@@ -57,6 +57,7 @@
             dest=/var/www/vhosts/{{ server_name }}/index.html
             owner={{ document_owner }}
             group={{ document_group }}
+  when: TESTING
   sudo: yes
 
 - name: deactivate default domain
