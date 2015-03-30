@@ -11,7 +11,7 @@ before_install:
 
 install:
   # Install Ansible.
-  - pip install ansible
+  - pip install ansible==1.8.4 
 
   # Add ansible.cfg to pick up roles path.
   - printf '[defaults]\nroles_path = ../' > ansible.cfg
@@ -31,7 +31,7 @@ script:
   # Run the role/playbook again, checking to make sure it's idempotent.
   - >
     ansible-playbook -i tests/inventory/test tests/$SITE --connection=local --sudo
-    | grep -q 'changed=0.*failed=0'
+    | grep -q 'changed=1.*failed=0'
     && (echo 'Idempotence test: pass' && exit 0)
     || (echo 'Idempotence test: fail' && exit 1)
 
@@ -42,7 +42,64 @@ script:
     || (echo 'Apache2 is accessible: fail' && exit 1)
 
   - >
+    curl -s http://example.com/
+    | grep -iq "hello"
+    && (echo 'IndexPage is configured: pass' && exit 0)
+    || (echo 'IndexPage is configured: fail' && exit 1)
+
+  - >
+    sudo apache2ctl -S
+    | grep 80
+    | grep -q "example.com"
+    && (echo 'Domain is configured: pass' && exit 0)
+    || (echo 'Domain is configured: fail' && exit 1)
+
+  - >
     sudo netstat -plnt
     | grep -q 80
+    && (echo 'Apache2 is listening: pass' && exit 0)
+    || (echo 'Apache2 is listening: fail' && exit 1)
+
+  #  
+  #                CREATE HTTPS DEPLOYMENT
+  #
+  # Run the role/playbook with ansible-playbook.
+  - ansible-playbook -i tests/inventory/test tests/$SITE -e "SSL=true port=443" --connection=local --sudo
+
+  # Run the role/playbook again, checking to make sure it's idempotent.
+  - >
+    ansible-playbook -i tests/inventory/test tests/$SITE -e "SSL=true port=443" --connection=local --sudo
+    | grep -q 'changed=1.*failed=0'
+    && (echo 'Idempotence test: pass' && exit 0)
+    || (echo 'Idempotence test: fail' && exit 1)
+
+  - >
+    curl -Is --insecure https://example.com/
+    | grep -q "HTTP/1.1 200 OK"     
+    && (echo 'Apache2 is accessible: pass' && exit 0)      
+    || (echo 'Apache2 is accessible: fail' && exit 1)
+
+  - >
+    curl -s --insecure https://example.com/
+    | grep -iq "hello"
+    && (echo 'IndexPage is configured: pass' && exit 0)
+    || (echo 'IndexPage is configured: fail' && exit 1)
+
+  - >
+    sudo apache2ctl -M
+    | grep -iq ssl
+    && (echo 'SSL Mod is configured: pass' && exit 0)
+    || (echo 'SSL Mod is configured: fail' && exit 1)
+
+  - >
+    sudo apache2ctl -S
+    | grep 443
+    | grep -q "example.com"
+    && (echo 'Domain is configured: pass' && exit 0)
+    || (echo 'Domain is configured: fail' && exit 1)
+
+  - >
+    sudo netstat -plnt
+    | grep -q 443
     && (echo 'Apache2 is listening: pass' && exit 0)
     || (echo 'Apache2 is listening: fail' && exit 1)
