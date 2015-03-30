@@ -80,7 +80,7 @@ script:
     || (echo 'Apache2 is accessible: fail' && exit 1)
 
   - >
-    curl -s https://example.com/
+    curl -s --insecure https://example.com/
     | grep -iq "hello"
     && (echo 'IndexPage is configured: pass' && exit 0)
     || (echo 'IndexPage is configured: fail' && exit 1)
