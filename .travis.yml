@@ -41,10 +41,11 @@ script:
     && (echo 'Apache2 is accessible: pass' && exit 0)      
     || (echo 'Apache2 is accessible: fail' && exit 1)
 
-  - curl -s http://example.com/
-    | grep -iq hello
-    && (echo 'Index Page is configured: pass' && exit 0)
-    || (echo 'Index Page is configured: fail' && exit 1)
+  - >
+    curl -s http://example.com/
+    | grep -iq "hello"
+    && (echo 'IndexPage is configured: pass' && exit 0)
+    || (echo 'IndexPage is configured: fail' && exit 1)
 
   - >
     sudo apache2ctl -S
@@ -78,10 +79,11 @@ script:
     && (echo 'Apache2 is accessible: pass' && exit 0)      
     || (echo 'Apache2 is accessible: fail' && exit 1)
 
-  - curl -s https://example.com/
-    | grep -iq hello
-    && (echo 'Index Page is configured: pass' && exit 0)
-    || (echo 'Index Page is configured: fail' && exit 1)
+  - >
+    curl -s https://example.com/
+    | grep -iq "hello"
+    && (echo 'IndexPage is configured: pass' && exit 0)
+    || (echo 'IndexPage is configured: fail' && exit 1)
 
   - >
     sudo apache2ctl -M
